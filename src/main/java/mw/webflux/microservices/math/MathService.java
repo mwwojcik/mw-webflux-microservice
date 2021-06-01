@@ -1,6 +1,7 @@
 package mw.webflux.microservices.math;
 
 import java.time.Instant;
+import mw.webflux.microservices.commons.Sleeper;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -13,6 +14,6 @@ public class MathService {
     }
 
     public Flux<MathResponse> generateMultiplicationTable(int input) {
-        return Flux.range(1, 10).map(val -> MathResponse.from(Instant.now(), val * input));
+        return Flux.range(1, 10).map(val -> MathResponse.from(Instant.now(), val * input)).doOnNext((res)-> Sleeper.sleepSecconds(2));
     }
 }
