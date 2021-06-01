@@ -1,0 +1,13 @@
+POST http://localhost:9898/reactive-math/multiply
+Content-Type: application/json
+
+{
+"first": 2,
+"second": 3
+}
+
+
+
+
+###
+GET http://localhost:9898/reactive-math/table/7
