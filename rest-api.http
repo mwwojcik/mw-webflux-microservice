@@ -11,3 +11,6 @@ Content-Type: application/json
 
 ###
 GET http://localhost:9898/reactive-math/table/7
+
+###
+GET http://localhost:9898/reactive-math/validated-square/51

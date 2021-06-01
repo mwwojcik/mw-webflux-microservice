@@ -23,6 +23,12 @@ public class MathController {
         return mathService.square(input);
     }
 
+
+    @GetMapping(value = "/validated-square/{input}",produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Mono<MathResponse> squareWithValidation(@PathVariable int input) {
+        return mathService.squareWithValidation(input);
+    }
+
     @GetMapping(value = "/table/{input}",produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<MathResponse> table(@PathVariable int input) {
         return mathService.generateMultiplicationTable(input);
