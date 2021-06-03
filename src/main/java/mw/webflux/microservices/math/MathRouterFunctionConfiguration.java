@@ -7,6 +7,12 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 
 public class MathRouterFunctionConfiguration {
 
+    /**
+     *
+     * There is no problem with decomposition this method. There is possible to have multiple RouterFounction methods.
+     */
+
+
     @Bean
     public RouterFunction<ServerResponse> mathServiceRouterFunction(MathServiceRouterHandler mathServiceRouterHandler) {
         return RouterFunctions.route()
