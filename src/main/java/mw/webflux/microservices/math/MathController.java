@@ -2,6 +2,7 @@ package mw.webflux.microservices.math;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.json.AbstractJackson2Encoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,3 +40,20 @@ public class MathController {
         return mathService.multiply(multiplicityRequest);
     }
 }
+
+
+/*
+* UWAGA!!
+*
+* Jeśli nie zostanie ustawiony produces = MediaType.TEXT_EVENT_STREAM_VALUE wtedy mimot tego że obsługa żądania jest reaktywna
+* to spodziewany typ wyjściowy to JSON, w klasie AbstractJackson2Encoder następuje blokujące kolekcjonowanie wszystkich elementów
+* i zwrot w postaci jednej listy!
+*
+* else { // non-streaming
+				ResolvableType listType = ResolvableType.forClassWithGenerics(List.class, elementType);
+				return Flux.from(inputStream)
+						.collectList()
+						.map(list -> encodeValue(list, bufferFactory, listType, mimeType, hints))
+						.flux();
+			}
+* */
