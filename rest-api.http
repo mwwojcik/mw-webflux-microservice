@@ -15,5 +15,22 @@ GET http://localhost:9898/reactive-math/table/7
 ###
 GET http://localhost:9898/reactive-math/validated-square/51
 
+//Endpoints exposed via router function
+
 ###
 GET http://localhost:9898/reactive-math/router/square/9
+
+###
+GET http://localhost:9898/reactive-math/router/table/9
+
+###
+GET http://localhost:9898/reactive-math/router/table-stream/9
+
+###
+POST http://localhost:9898/reactive-math/router/multiply
+Content-Type: application/json
+
+{
+"first": 2,
+"second": 7
+}

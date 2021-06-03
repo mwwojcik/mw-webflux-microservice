@@ -11,6 +11,9 @@ public class MathRouterFunctionConfiguration {
     public RouterFunction<ServerResponse> mathServiceRouterFunction(MathServiceRouterHandler mathServiceRouterHandler) {
         return RouterFunctions.route()
                               .GET("/reactive-math/router/square/{input}", mathServiceRouterHandler::squareHandler)
+                              .GET("/reactive-math/router/table/{input}",mathServiceRouterHandler::multiplicationTableHandler)
+                              .GET("/reactive-math/router/table-stream/{input}",mathServiceRouterHandler::multiplicationTableStreamHandler)
+                              .POST("/reactive-math/router/multiply",mathServiceRouterHandler::multipicity)
                               .build();
     }
 
