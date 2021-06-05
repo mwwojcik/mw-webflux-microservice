@@ -2,6 +2,7 @@ package mw.webflux.microservices.math;
 
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.Fail;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,4 +81,18 @@ class MathServiceRouterHandlerTest {
 
         StepVerifier.create(mathResponseMono).expectNextCount(1).verifyComplete();
     }
+    @DisplayName("Should set some custom header")
+    @Test
+    void shouldSetSomeCustomHeader() {
+        var mathResponseMono = webClient.post()
+                                        .uri("/reactive-math/router/multiply")
+                                        //if producer type use body(), else bodyValue()
+                                        .bodyValue(new MultiplicityRequest(7, 8))
+                                        .headers(h->h.set("someCustomKey","someCustomValue"))
+                                        .retrieve()
+                                        .bodyToMono(MathResponse.class)
+                                        .doOnNext(it -> log.info(String.valueOf(it.getValue())));
+
+        StepVerifier.create(mathResponseMono).expectNextCount(1).verifyComplete();
+     }
 }
