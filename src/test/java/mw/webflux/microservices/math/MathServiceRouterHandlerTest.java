@@ -57,4 +57,17 @@ class MathServiceRouterHandlerTest {
 
         StepVerifier.create(mathResponseFlux).expectNextCount(10).verifyComplete();
      }
+
+     @DisplayName("Should return multiplicity table stream for given number")
+     @Test
+     void shouldReturnMultiplicityTableStreamForGivenNumber() {
+         var mathResponseFlux = webClient.get()
+                                         .uri("/reactive-math/router/table-stream/{input}", 7)
+                                         .retrieve()
+                                         .bodyToFlux(MathResponse.class)
+                                         .doOnNext((it)->log.info(String.valueOf(it.getValue())));
+
+         StepVerifier.create(mathResponseFlux).expectNextCount(10).verifyComplete();
+
+     }
 }
