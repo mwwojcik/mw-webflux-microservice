@@ -2,15 +2,15 @@ package mw.webflux.microservices.math;
 
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
-import org.assertj.core.api.Fail;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.web.client.HttpClientErrorException.BadRequest;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 @SpringBootTest(classes = MathRouterFunctionConfiguration.class)
@@ -83,6 +83,7 @@ class MathServiceRouterHandlerTest {
 
         StepVerifier.create(mathResponseMono).expectNextCount(1).verifyComplete();
     }
+
     @DisplayName("Should set some custom header")
     @Test
     void shouldSetSomeCustomHeader() {
@@ -90,27 +91,52 @@ class MathServiceRouterHandlerTest {
                                         .uri("/reactive-math/router/multiply")
                                         //if producer type use body(), else bodyValue()
                                         .bodyValue(new MultiplicityRequest(7, 8))
-                                        .headers(h->h.set("someCustomKey","someCustomValue"))
+                                        .headers(h -> h.set("someCustomKey", "someCustomValue"))
                                         .retrieve()
                                         .bodyToMono(MathResponse.class)
                                         .doOnNext(it -> log.info(String.valueOf(it.getValue())));
 
         StepVerifier.create(mathResponseMono).expectNextCount(1).verifyComplete();
-     }
+    }
 
-     @DisplayName("Should react on bad request exception")
-     @Test
-     void shouldReactOnBadRequestException() {
-         var mathResponseMono = webClient.post()
-                                         .uri("/reactive-math/router/multiply")
-                                         //if producer type use body(), else bodyValue()
-                                         .bodyValue(Integer.valueOf(10))
-                                         .retrieve()
-                                         .bodyToMono(MathResponse.class)
-                                         .doOnNext(it -> log.info(String.valueOf(it.getValue())))
-             .doOnError(it->log.info(String.format("ERROR=>%s", it.getMessage())));
+    @DisplayName("Should react on bad request exception")
+    @Test
+    void shouldReactOnBadRequestException() {
+        var mathResponseMono = webClient.post()
+                                        .uri("/reactive-math/router/multiply")
+                                        //if producer type use body(), else bodyValue()
+                                        .bodyValue(Integer.valueOf(10))
+                                        .retrieve()
+                                        .bodyToMono(MathResponse.class)
+                                        .doOnNext(it -> log.info(String.valueOf(it.getValue())))
+                                        .doOnError(it -> log.info(String.format("ERROR=>%s", it.getMessage())));
 
-         StepVerifier.create(mathResponseMono).verifyError(WebClientResponseException.BadRequest.class);
+        StepVerifier.create(mathResponseMono).verifyError(WebClientResponseException.BadRequest.class);
 
-     }
+    }
+
+    @DisplayName("Should react on bad request exeption and retrieve additional information")
+    @Test
+    void shouldReactOnBadRequestExeptionAndRetrieveAdditionalInformation() {
+        //exchange = retrieve + additional info about http status
+        var mathResponseMono = webClient.post()
+                                        .uri("/reactive-math/router/multiply")
+                                        //if producer type use body(), else bodyValue()
+                                        .bodyValue(Integer.valueOf(10))
+                                        .exchangeToMono(this::exchange)
+                                        //.bodyToMono(MathResponse.class)
+                                        .doOnNext(it -> log.info(String.valueOf(it)))
+                                        .doOnError(it -> log.info(String.format("ERROR=>%s", it.getMessage())));
+        // it never will be an error - exchange() method changes the type - output will be normal object type
+        StepVerifier.create(mathResponseMono).expectNextCount(1).verifyComplete();
+    }
+
+     private Mono<Object> exchange(ClientResponse resp) {
+         if (resp.rawStatusCode()==400) {
+             return resp.bodyToMono(String.class);
+         }else {
+             return resp.bodyToMono(MathResponse.class);
+         }
+    }
+
 }
