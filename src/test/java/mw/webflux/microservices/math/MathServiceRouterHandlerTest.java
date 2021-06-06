@@ -8,7 +8,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.web.client.HttpClientErrorException.BadRequest;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.test.StepVerifier;
 
 @SpringBootTest(classes = MathRouterFunctionConfiguration.class)
@@ -94,5 +96,21 @@ class MathServiceRouterHandlerTest {
                                         .doOnNext(it -> log.info(String.valueOf(it.getValue())));
 
         StepVerifier.create(mathResponseMono).expectNextCount(1).verifyComplete();
+     }
+
+     @DisplayName("Should react on bad request exception")
+     @Test
+     void shouldReactOnBadRequestException() {
+         var mathResponseMono = webClient.post()
+                                         .uri("/reactive-math/router/multiply")
+                                         //if producer type use body(), else bodyValue()
+                                         .bodyValue(Integer.valueOf(10))
+                                         .retrieve()
+                                         .bodyToMono(MathResponse.class)
+                                         .doOnNext(it -> log.info(String.valueOf(it.getValue())))
+             .doOnError(it->log.info(String.format("ERROR=>%s", it.getMessage())));
+
+         StepVerifier.create(mathResponseMono).verifyError(WebClientResponseException.BadRequest.class);
+
      }
 }
